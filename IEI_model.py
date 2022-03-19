@@ -64,23 +64,23 @@ head_amount = 2
 learning_ratio = 2e-6
 dropout_ratio = 0.1
 
-# dropoutÎª0.1
-# 1e-8Ñ§Ï°ÂÊ¹ıµÍ£¬1ÂÖvalaccÎª0.049£»val_f1»ù±¾Îª0
-# 1e-6µÃµ½1ÂÖºÍÁ½ÂÖµÄ½á¹û¾ùÎª0.3084Òò´Ë¹ıÄâºÏ
+# dropoutä¸º0.1
+# 1e-8å­¦ä¹ ç‡è¿‡ä½ï¼Œ1è½®valaccä¸º0.049ï¼›val_f1åŸºæœ¬ä¸º0
+# 1e-6å¾—åˆ°1è½®å’Œä¸¤è½®çš„ç»“æœå‡ä¸º0.3084å› æ­¤è¿‡æ‹Ÿåˆ
 
-# ½µµÍdropoutÎª0.01
-# 1e-6ÈıÂÖ¹ıÄâºÏf1Îª0 val_accÎª0.8478
-# 1e-8ÈıÂÖ¹ıÄâºÏf1Îª0.3008
-# dopoutÎª0.00
-# 1e-8ÈıÂÖ¹ıÄâºÏf1Îª0.3008
+# é™ä½dropoutä¸º0.01
+# 1e-6ä¸‰è½®è¿‡æ‹Ÿåˆf1ä¸º0 val_accä¸º0.8478
+# 1e-8ä¸‰è½®è¿‡æ‹Ÿåˆf1ä¸º0.3008
+# dopoutä¸º0.00
+# 1e-8ä¸‰è½®è¿‡æ‹Ÿåˆf1ä¸º0.3008
 
 import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
-# È«¾Ö²ÎÊı
-# ÉèÖÃËæ»úÖµ
+# å…¨å±€å‚æ•°
+# è®¾ç½®éšæœºå€¼
 def set_seed(seed=1):
     random.seed(seed)
     np.random.seed(seed)
@@ -90,7 +90,7 @@ def set_seed(seed=1):
 set_seed(1314)
 
 
-# µÃµ½bert¶ÔÓ¦µÄids¼°maskÊäÈë
+# å¾—åˆ°bertå¯¹åº”çš„idsåŠmaskè¾“å…¥
 def _convert_to_transformer_inputs(instance, tokenizer, max_sequence_length):
     """Converts tokenized input to ids, masks and segments for transformer (including bert)"""
     inputs = tokenizer(instance, return_tensors="tf", padding="max_length", max_length=max_sequence_length)
@@ -101,7 +101,7 @@ def _convert_to_transformer_inputs(instance, tokenizer, max_sequence_length):
     return [input_ids, input_masks]
 
 
-# ½«ids¼°mask¶ÔÓ¦µÄÊı¾İ£¬·Ö±ğ°ü×°ÎªÊı×é[idsÊı×é£¬maskÊı×é]
+# å°†idsåŠmaskå¯¹åº”çš„æ•°æ®ï¼Œåˆ†åˆ«åŒ…è£…ä¸ºæ•°ç»„[idsæ•°ç»„ï¼Œmaskæ•°ç»„]
 def compute_input_arrays(train_data_input, tokenizer, max_sequence_length):
     input_ids, input_masks = [], []
     for instance in tqdm(train_data_input):
@@ -116,7 +116,7 @@ def dynamicMemoryLayer_v5():
     MAX_SEQUENCE_LENGTH_f_dml = 200
     hidden_dim_f_dml = 768
 
-    # ²úÉúmemoryVectorµÄ³õÊ¼»¯¾ØÕó
+    # äº§ç”ŸmemoryVectorçš„åˆå§‹åŒ–çŸ©é˜µ
 
     turn1_id = tf.keras.layers.Input((MAX_SEQUENCE_LENGTH_f_dml,), dtype=tf.int32)
     turn1_mask = tf.keras.layers.Input((MAX_SEQUENCE_LENGTH_f_dml,), dtype=tf.int32)
@@ -132,26 +132,26 @@ def dynamicMemoryLayer_v5():
 
     bert_model = TFDistilBertModel.from_pretrained('distilbert-base-uncased')
 
-    # ²úÉúturn1µÄbertÄ£ĞÍ
+    # äº§ç”Ÿturn1çš„bertæ¨¡å‹
     turn1_seq_output = bert_model(turn1_id, attention_mask=turn1_mask)
     turn1_seq_output = turn1_seq_output[0]
     x_1 = tf.keras.layers.GlobalAveragePooling1D()(turn1_seq_output)
     x_1 = Reshape((1, hidden_dim))(x_1)
 
-    # ²úÉúturn2µÄbertÄ£ĞÍ
+    # äº§ç”Ÿturn2çš„bertæ¨¡å‹
     turn2_seq_output = bert_model(turn2_id, attention_mask=turn2_mask)
     turn2_seq_output = turn2_seq_output[0]
     x_2 = tf.keras.layers.GlobalAveragePooling1D()(turn2_seq_output)
     x_2 = Reshape((1, hidden_dim))(x_2)
 
-    # ²úÉúturn3µÄbertÄ£ĞÍ
+    # äº§ç”Ÿturn3çš„bertæ¨¡å‹
     turn3_seq_output = bert_model(turn3_id, attention_mask=turn3_mask)
     turn3_seq_output = turn3_seq_output[0]
     x_3 = tf.keras.layers.GlobalAveragePooling1D()(turn3_seq_output)
     x_3 = Reshape((1, hidden_dim))(x_3)
 
     # -------------------------------------------------------------------------------------------------------------
-    # ½«µÚÒ»¸ömemoryVectorºÍturn1½øĞĞÈÚºÏ
+    # å°†ç¬¬ä¸€ä¸ªmemoryVectorå’Œturn1è¿›è¡Œèåˆ
     memoryVector = bert_model(memoryVector_id, attention_mask=memoryVecor_mask)
     memoryVector = memoryVector[0]
 
@@ -173,7 +173,7 @@ def dynamicMemoryLayer_v5():
     softmax_inter_left = Softmax()(scaledPool_inter_left)
     softmax_inter_right = Softmax()(scaledPool_inter_right)
 
-    # Èç¹ûmemoryVectorÏëÓë²úÉúµÄÖĞ¼äÏòÁ¿Ïà³Ë±ØĞë½«²úÉúµÄÖĞ¼äÏòÁ¿½øĞĞĞĞÀ©Õ¹£¬
+    # å¦‚æœmemoryVectoræƒ³ä¸äº§ç”Ÿçš„ä¸­é—´å‘é‡ç›¸ä¹˜å¿…é¡»å°†äº§ç”Ÿçš„ä¸­é—´å‘é‡è¿›è¡Œè¡Œæ‰©å±•ï¼Œ
     # memoryVector: seq_len X hiddendim; extend_softmax_inter_left: hiddenim X hiddendim
     extended_softmax_inter_left = Reshape([1, softmax_inter_left.shape[1]])(softmax_inter_left)
     for i in range(softmax_inter_left.shape[1] - 1):
@@ -182,13 +182,13 @@ def dynamicMemoryLayer_v5():
     memoryVector_turn1 = Dot(axes=1)([memoryVector, extended_softmax_inter_left])
     memoryVector_turn1 = Reshape([memoryVector_turn1.shape[2], memoryVector_turn1.shape[1]])(memoryVector_turn1)
     print("first processing period memoryVector is ", memoryVector_turn1)
-    # ²úÉúturn1¼ÇÒäĞĞÏòÁ¿
+    # äº§ç”Ÿturn1è®°å¿†è¡Œå‘é‡
     memoryVector_turn1_row = Dot(axes=1)([memoryVector, softmax_inter_left])
     memoryVector_turn1_row = Reshape([1, hidden_dim_f_dml])(memoryVector_turn1_row)
 
     # ---------------------------------------------------------------------------------------------------------------------
-    # ½«µÚÒ»¸ömemoryVectorºÍturn2½øĞĞÈÚºÏ
-    # ¶ÔÖĞ¼äÏòÁ¿softmax_inter_right½øĞĞĞĞÀ©Õ¹
+    # å°†ç¬¬ä¸€ä¸ªmemoryVectorå’Œturn2è¿›è¡Œèåˆ
+    # å¯¹ä¸­é—´å‘é‡softmax_inter_rightè¿›è¡Œè¡Œæ‰©å±•
     extended_softmax_inter_right = Reshape([1, softmax_inter_right.shape[1]])(softmax_inter_right)
     for i in range(softmax_inter_right.shape[1] - 1):
         reshaped_softmax_inter_right = Reshape([1, softmax_inter_right.shape[1]])(softmax_inter_right)
@@ -196,11 +196,11 @@ def dynamicMemoryLayer_v5():
     turn2_input_mid = Dot(axes=1)([turn2_seq_output, extended_softmax_inter_right])
     turn2_input_mid = Reshape([turn2_input_mid.shape[2], turn2_input_mid.shape[1]])(turn2_input_mid)
     print("second start processing period turn_ is ", turn2_input_mid)
-    # ²úÉúturn2ÈÚºÏĞĞÏòÁ¿
+    # äº§ç”Ÿturn2èåˆè¡Œå‘é‡
     turn2_input_mid_row = Dot(axes=1)([turn2_seq_output, softmax_inter_right])
     turn2_input_mid_row = Reshape([1, hidden_dim_f_dml])(turn2_input_mid_row)
 
-    # ¿ªÊ¼µÚ¶şÂÖÈÚºÏ
+    # å¼€å§‹ç¬¬äºŒè½®èåˆ
     interActivateVec = interActivate(hidden_dims=hidden_dim_f_dml)([memoryVector_turn1, turn2_input_mid])
     print("second period input_size", interActivateVec)
 
@@ -218,7 +218,7 @@ def dynamicMemoryLayer_v5():
     softmax_inter_left = Softmax()(scaledPool_inter_left)
     softmax_inter_right = Softmax()(scaledPool_inter_right)
 
-    # Èç¹ûmemoryVectorÏëÓë²úÉúµÄÖĞ¼äÏòÁ¿Ïà³Ë±ØĞë½«²úÉúµÄÖĞ¼äÏòÁ¿½øĞĞĞĞÀ©Õ¹£¬
+    # å¦‚æœmemoryVectoræƒ³ä¸äº§ç”Ÿçš„ä¸­é—´å‘é‡ç›¸ä¹˜å¿…é¡»å°†äº§ç”Ÿçš„ä¸­é—´å‘é‡è¿›è¡Œè¡Œæ‰©å±•ï¼Œ
     # memoryVector: seq_len X hiddendim; extend_softmax_inter_left: hiddenim X hiddendim
     extended_softmax_inter_left = Reshape([1, softmax_inter_left.shape[1]])(softmax_inter_left)
     for i in range(softmax_inter_left.shape[1] - 1):
@@ -227,13 +227,13 @@ def dynamicMemoryLayer_v5():
     memoryVector_turn2 = Dot(axes=1)([memoryVector_turn1, extended_softmax_inter_left])
     memoryVector_turn2 = Reshape([memoryVector_turn2.shape[2], memoryVector_turn2.shape[1]])(memoryVector_turn2)
     print("first processing period memoryVector is ", memoryVector_turn2)
-    # ²úÉúturn2¼ÇÒäĞĞÏòÁ¿
+    # äº§ç”Ÿturn2è®°å¿†è¡Œå‘é‡
     memoryVector_turn2_row = Dot(axes=1)([memoryVector_turn1, softmax_inter_left])
     memoryVector_turn2_row = Reshape([1, hidden_dim_f_dml])(memoryVector_turn2_row)
 
     # ---------------------------------------------------------------------------------------------------------------------
-    # ½«µÚÒ»¸ömemoryVectorºÍturn3½øĞĞÈÚºÏ
-    # ¶ÔÖĞ¼äÏòÁ¿softmax_inter_right½øĞĞĞĞÀ©Õ¹
+    # å°†ç¬¬ä¸€ä¸ªmemoryVectorå’Œturn3è¿›è¡Œèåˆ
+    # å¯¹ä¸­é—´å‘é‡softmax_inter_rightè¿›è¡Œè¡Œæ‰©å±•
     extended_softmax_inter_right = Reshape([1, softmax_inter_right.shape[1]])(softmax_inter_right)
     for i in range(softmax_inter_right.shape[1] - 1):
         reshaped_softmax_inter_right = Reshape([1, softmax_inter_right.shape[1]])(softmax_inter_right)
@@ -241,11 +241,11 @@ def dynamicMemoryLayer_v5():
     turn3_input_mid = Dot(axes=1)([turn3_seq_output, extended_softmax_inter_right])
     turn3_input_mid = Reshape([turn3_input_mid.shape[2], turn3_input_mid.shape[1]])(turn3_input_mid)
     print("third start processing period turn_ is ", turn3_input_mid)
-    # ²úÉúturn3ÈÚºÏĞĞÏòÁ¿
+    # äº§ç”Ÿturn3èåˆè¡Œå‘é‡
     turn3_input_mid_row = Dot(axes=1)([turn3_seq_output, softmax_inter_right])
     turn3_input_mid_row = Reshape([1, hidden_dim_f_dml])(turn3_input_mid_row)
 
-    # ¿ªÊ¼µÚÈıÂÖÈÚºÏ
+    # å¼€å§‹ç¬¬ä¸‰è½®èåˆ
     interActivateVec = interActivate(hidden_dims=hidden_dim_f_dml)([memoryVector_turn2, turn3_input_mid])
     print("thrid period input_size", interActivateVec)
 
@@ -264,7 +264,7 @@ def dynamicMemoryLayer_v5():
     softmax_inter_right = Softmax()(scaledPool_inter_right)
 
     # -----------------------------------------------------------------------------------------------------
-    # Èç¹ûmemoryVectorÏëÓë²úÉúµÄÖĞ¼äÏòÁ¿Ïà³Ë±ØĞë½«²úÉúµÄÖĞ¼äÏòÁ¿½øĞĞĞĞÀ©Õ¹£¬
+    # å¦‚æœmemoryVectoræƒ³ä¸äº§ç”Ÿçš„ä¸­é—´å‘é‡ç›¸ä¹˜å¿…é¡»å°†äº§ç”Ÿçš„ä¸­é—´å‘é‡è¿›è¡Œè¡Œæ‰©å±•ï¼Œ
     # memoryVector: seq_len X hiddendim; extend_softmax_inter_left: hiddenim X hiddendim
     extended_softmax_inter_left = Reshape([1, softmax_inter_left.shape[1]])(softmax_inter_left)
     for i in range(softmax_inter_left.shape[1] - 1):
@@ -274,13 +274,13 @@ def dynamicMemoryLayer_v5():
     memoryVector_turn3 = Reshape([memoryVector_turn3.shape[2], memoryVector_turn3.shape[1]])(memoryVector_turn3)
     print("third processing period memoryVector is ", memoryVector_turn3)
 
-    # ²úÉúturn3¼ÇÒäĞĞÏòÁ¿
+    # äº§ç”Ÿturn3è®°å¿†è¡Œå‘é‡
     memoryVector_turn3_row = Dot(axes=1)([memoryVector_turn2, softmax_inter_left])
     memoryVector_turn3_row = Reshape([1, hidden_dim_f_dml])(memoryVector_turn3_row)
 
     # ---------------------------------------------------------------------------------------------------------------------
-    # ½«µÚÒ»¸ömemoryVectorºÍturn3½øĞĞÈÚºÏ
-    # ¶ÔÖĞ¼äÏòÁ¿softmax_inter_right½øĞĞĞĞÀ©Õ¹
+    # å°†ç¬¬ä¸€ä¸ªmemoryVectorå’Œturn3è¿›è¡Œèåˆ
+    # å¯¹ä¸­é—´å‘é‡softmax_inter_rightè¿›è¡Œè¡Œæ‰©å±•
     extended_softmax_inter_right = Reshape([1, softmax_inter_right.shape[1]])(softmax_inter_right)
     for i in range(softmax_inter_right.shape[1] - 1):
         reshaped_softmax_inter_right = Reshape([1, softmax_inter_right.shape[1]])(softmax_inter_right)
@@ -289,12 +289,12 @@ def dynamicMemoryLayer_v5():
     turn3_output = Reshape([turn3_output.shape[2], turn3_output.shape[1]])(turn3_output)
     print("third start end period turn_3 is ", turn3_output)
 
-    # ²úÉúturn3ÈÚºÏĞĞÏòÁ¿
+    # äº§ç”Ÿturn3èåˆè¡Œå‘é‡
     turn3_output_row = Dot(axes=1)([turn3_seq_output, softmax_inter_right])
     turn3_output_row = Reshape([1, hidden_dim_f_dml])(turn3_output_row)
     # --------------------------------------------------------------------------------------------------------
 
-    # ½«ÖĞ¼äÊä³öµÄturn1¡¢turn2¡¢turn3Ê¹ÓÃĞĞ¶ÑµşµÄ·½Ê½½øĞĞÀ©Õ¹
+    # å°†ä¸­é—´è¾“å‡ºçš„turn1ã€turn2ã€turn3ä½¿ç”¨è¡Œå †å çš„æ–¹å¼è¿›è¡Œæ‰©å±•
 
     comboVec = Concatenate(axis=1)([turn3_input_mid_row, memoryVector_turn3_row, turn3_output_row])
     # comboVec = Reshape([hidden_dim_f_dml*2])(comboVec)
@@ -314,10 +314,10 @@ def dynamicMemoryLayer_v5():
 import pickle
 
 if __name__ == '__main__':
-    # 6G RTX1060 Ã¿ÂÖÔ¼Ğè1¸öĞ¡Ê±
+    # 6G RTX1060 æ¯è½®çº¦éœ€1ä¸ªå°æ—¶
 
     # load train/dev/test test
-    # ¶ÁÈ¡ÓïÁÏĞÅÏ¢
+    # è¯»å–è¯­æ–™ä¿¡æ¯
     TRAIN_PATH = '../data/singleTurns/train.txt'
     DEV_PATH = '../data/singleTurns/dev.txt'
     TEST_PATH = '../data/singleTurns/test.txt'
@@ -325,7 +325,7 @@ if __name__ == '__main__':
     dev_data = pd.read_table(DEV_PATH, sep='\t')
     test_data = pd.read_table(TEST_PATH, sep='\t')
 
-    # ¶ÁÈ¡train, dev, test¸÷½×¶ÎÓïÁÏ¿âµÄÄÚÈİ
+    # è¯»å–train, dev, testå„é˜¶æ®µè¯­æ–™åº“çš„å†…å®¹
     turn1_x_train = [i_list for i_list in train_data['turn1']]
     turn2_x_train = [i_list for i_list in train_data['turn2']]
     turn3_x_train = [i_list for i_list in train_data['turn3']]
@@ -339,32 +339,32 @@ if __name__ == '__main__':
     turn3_x_test = [i_list for i_list in test_data['turn3']]
 
     # the length of different sets
-    # Í³¼Æ¸÷³¤¶ÈµÄÓï¾äµÄÊıÁ¿£¬²¢ÏÔÊ¾
+    # ç»Ÿè®¡å„é•¿åº¦çš„è¯­å¥çš„æ•°é‡ï¼Œå¹¶æ˜¾ç¤º
     trainLenCounter = Counter(
         [len(i) for i in turn1_x_train] + [len(i) for i in turn2_x_train] + [len(i) for i in turn3_x_train])
     devLenCounter = Counter(
         [len(i) for i in turn1_x_dev] + [len(i) for i in turn2_x_dev] + [len(i) for i in turn3_x_dev])
     testLenCounter = Counter(
         [len(i) for i in turn1_x_test] + [len(i) for i in turn2_x_test] + [len(i) for i in turn3_x_test])
-    # »ñµÃÊı¾İ¼¯ÖĞÃ¿¸ö³¤¶È³öÏÖµÄ´ÎÊı
+    # è·å¾—æ•°æ®é›†ä¸­æ¯ä¸ªé•¿åº¦å‡ºç°çš„æ¬¡æ•°
     trainLenFre = sorted(dict(trainLenCounter).items(), key=lambda d: d[0], reverse=True)
-    # ³¤¶È´óÓÚÄ³¸öÊıÖµµÄ±ÈÀı,
-    # ÔÚtrainÖĞ³¤¶È´óÓÚ120µÄ±ÈÀıÎª0.00087£¬´óÓÚ100µÄ±ÈÀıÎª0.0020
+    # é•¿åº¦å¤§äºæŸä¸ªæ•°å€¼çš„æ¯”ä¾‹,
+    # åœ¨trainä¸­é•¿åº¦å¤§äº120çš„æ¯”ä¾‹ä¸º0.00087ï¼Œå¤§äº100çš„æ¯”ä¾‹ä¸º0.0020
     lengthRatio_train = sum([value_list for key_list, value_list in trainLenFre if key_list > 100]) / (
                 3 * len(turn1_x_train))
 
-    # ÔÚdevÖĞ³¤¶È´óÓÚ120µÄ±ÈÀıÎª0.00097£¬´óÓÚ100µÄ±ÈÀıÎª0.0021
+    # åœ¨devä¸­é•¿åº¦å¤§äº120çš„æ¯”ä¾‹ä¸º0.00097ï¼Œå¤§äº100çš„æ¯”ä¾‹ä¸º0.0021
     devLenFre = sorted(dict(devLenCounter).items(), key=lambda d: d[0], reverse=True)
     lengthRatio_dev = sum([value_list for key_list, value_list in devLenFre if key_list > 100]) / (3 * len(turn1_x_dev))
 
-    # ÔÚtestÖĞ³¤¶È´óÓÚ120µÄ±ÈÀıÎª0.00048£¬´óÓÚ100µÄ±ÈÀıÎª0.0012
+    # åœ¨testä¸­é•¿åº¦å¤§äº120çš„æ¯”ä¾‹ä¸º0.00048ï¼Œå¤§äº100çš„æ¯”ä¾‹ä¸º0.0012
     testLenFre = sorted(dict(testLenCounter).items(), key=lambda d: d[0], reverse=True)
     lengthRatio_test = sum([value_list for key_list, value_list in testLenFre if key_list > 100]) / (
                 3 * len(turn1_x_test))
 
     TRUNCATED_LENGTH = 200
 
-    # µÃµ½Êı¾İÖĞ×î³¤µÄĞòÁĞ³¤¶È
+    # å¾—åˆ°æ•°æ®ä¸­æœ€é•¿çš„åºåˆ—é•¿åº¦
     max_train_lens = max(max([len(i) for i in turn1_x_train]), max([len(i) for i in turn2_x_train]),
                          max([len(i) for i in turn3_x_train]))
 
@@ -375,8 +375,8 @@ if __name__ == '__main__':
 
     max_seq_len = max(max_train_lens, max_dev_lens, max_test_lens)
 
-    # »ñÈ¡ÊäÈëÖĞµÄy
-    # ¶ÁÈ¡Ô­´æ´¢Êı¾İÖĞµÄy
+    # è·å–è¾“å…¥ä¸­çš„y
+    # è¯»å–åŸå­˜å‚¨æ•°æ®ä¸­çš„y
     emotion2label = {'sad': 0, 'happy': 1, 'angry': 2, 'others': 3}
     y_train = np_utils.to_categorical(np.array([emotion2label[i_list] for i_list in train_data['label']]))
     y_dev = np_utils.to_categorical(np.array([emotion2label[i_list] for i_list in dev_data['label']]))
@@ -384,17 +384,17 @@ if __name__ == '__main__':
 
     # --------------------------------------------------------------------------------------------------------------
     '''
-    print("¿ªÊ¼·Ö±ğÈ¡³ö×óÓÒÁ½²à")
-    #Éú³Ébert´ÊÏòÁ¿
+    print("å¼€å§‹åˆ†åˆ«å–å‡ºå·¦å³ä¸¤ä¾§")
+    #ç”Ÿæˆbertè¯å‘é‡
     #left bertEmbedding
     #input_type means 0:left_train
-    # Éú³Ébert Embedding
+    # ç”Ÿæˆbert Embedding
     tokenizer = RobertaTokenizerFast.from_pretrained("roberta-base", pad_token='[PAD]')
-    # ²úÉú¸÷¸ö¼¯ºÏµÄ²»Í¬ÊäÈëĞòÁĞ
+    # äº§ç”Ÿå„ä¸ªé›†åˆçš„ä¸åŒè¾“å…¥åºåˆ—
     turn1_train_inputs = compute_input_arrays(turn1_x_train, tokenizer, TRUNCATED_LENGTH)
     turn2_train_inputs = compute_input_arrays(turn2_x_train, tokenizer, TRUNCATED_LENGTH)
     turn3_train_inputs = compute_input_arrays(turn3_x_train, tokenizer, TRUNCATED_LENGTH)
-    print("Íê³Étrain¼¯ºÏ")
+    print("å®Œæˆtrainé›†åˆ")
 
 
     turn1_dev_inputs = compute_input_arrays(turn1_x_dev, tokenizer, TRUNCATED_LENGTH)
@@ -415,7 +415,7 @@ if __name__ == '__main__':
     '''
     # --------------------------------------------------------------------------------------------------------------
 
-    print("3 turnsµÄÔ¤´¦Àí¹¤×÷ÒÑ¾­´¦ÀíÍê³É")
+    print("3 turnsçš„é¢„å¤„ç†å·¥ä½œå·²ç»å¤„ç†å®Œæˆ")
 
     pickle_file = open('../data/singleTurns/pickle/roberta/context_bert_chinese.pickle', 'rb')
     turn1_train_inputs, turn1_dev_inputs, turn1_test_inputs, turn2_train_inputs, turn2_dev_inputs, \
@@ -435,28 +435,25 @@ if __name__ == '__main__':
     dropout_ratioList = [0.0,0.1, 0.2, 0.3, 0.4, 0.5]
     head_amount_list = [2,4,8,16,32,64,128]
     epoch_list = [8]
-    #Ñ¡¶¨²ÎÊı8head,0.1dropout,²âÊÔ²»Í¬ÂÖÊıÏÂµÄ³É¼¨
+    #é€‰å®šå‚æ•°8head,0.1dropout,æµ‹è¯•ä¸åŒè½®æ•°ä¸‹çš„æˆç»©
     for i in epoch_list:
-        print("¿ªÊ¼ÑµÁ·")
+        print("å¼€å§‹è®­ç»ƒ")
         dropout_ratio = 0.5
         head_amount = 4
-        model = sequenceDynamicMemoryLayerCap_v5()
-        #model = sequenceDynamicMemoryLayerTransWLstm_v5()
-        model = sequenceDynamicMemoryLayerCap_Hingeloss_ablation_tanh()
-        model = sequenceDynamicMemoryLayerCap_Hingeloss()
+        model = dynamicMemoryLayer_v5()   
         print("model summary:",model.summary())
         print("model layers description:", model.layers)
 
-        # ÑµÁ·Ä£ĞÍ
+        # è®­ç»ƒæ¨¡å‹
         early_stopping = EarlyStopping(monitor='acc', patience=3)
 
         model.fit(x_train_inputs, y_train,
                   validation_data=(x_dev_inputs, y_dev),
                   batch_size=batch_size, epochs=i,
                   #callbacks=[early_stopping],
-                  verbose=1)  # verbose=0²»Êä³öÈÕÖ¾ĞÅÏ¢;verbose=1ÖğÌõÊä³öÈÕÖ¾ĞÅÏ¢£»verbose=2Êä³öevlaueÈÕÖ¾ĞÅÏ¢¡£
+                  verbose=1)  # verbose=0ä¸è¾“å‡ºæ—¥å¿—ä¿¡æ¯;verbose=1é€æ¡è¾“å‡ºæ—¥å¿—ä¿¡æ¯ï¼›verbose=2è¾“å‡ºevlaueæ—¥å¿—ä¿¡æ¯ã€‚
 
-        # Ê¹ÓÃÄ£ĞÍ½øĞĞÔ¤²â
+        # ä½¿ç”¨æ¨¡å‹è¿›è¡Œé¢„æµ‹
         y_pred = model.predict(x_test_inputs, batch_size=batch_size)
         y_pred = np.argmax(y_pred, axis=1)
 
@@ -470,6 +467,3 @@ if __name__ == '__main__':
         result_save_path_1 = "../result/tanh_transCap_4head_lr"+str(learning_ratio )+"dr_0.1_context_bert_wordEmbedding_epochs" + str(i) + "_f1value" + str(
             task3returnMicroF1(result_save_path)) + ".csv"
         result_output.to_csv(result_save_path_1, index=False, quoting=3)
-
-
-from collections import OrderedDict, Counter
